@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function
 
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
@@ -16,9 +17,15 @@ import collections
 from collections import OrderedDict
 import webbrowser
 import yaml, pprint
-import StringIO
+from io import BytesIO
 import shelve
 import pandas as pd
+
+# python 2 / 3 compatibility
+try:
+    input = raw_input
+except NameError:
+    pass
 
 LOGLEVELS = {'DEBUG': logging.DEBUG,
              'INFO': logging.INFO,
@@ -88,7 +95,7 @@ def get_file(title=None, fmt='dict', **kwargs):
         raise ValueError('`title` not found in options.  exiting')
 
     content = get_content(opts)
-    wb = pd.ExcelFile(StringIO.StringIO(content))
+    wb = pd.ExcelFile(BytesIO(content))
 
     if fmt == 'pandas_excel':
         return wb
@@ -96,9 +103,9 @@ def get_file(title=None, fmt='dict', **kwargs):
     try:
         parsed_wb = OrderedDict([(sheet_name, wb.parse(sheet_name, header=opts['header'])) for sheet_name in wb.sheet_names])
     except:
-        print 'error parsing worksheet using pandas.ExcelFile.parse(sheet_name). '\
+        print('error parsing worksheet using pandas.ExcelFile.parse(sheet_name). '\
               'Consider using the pandas_excel fmt in get_file and parsing the fileA '\
-              'yourself to have more control'
+              'yourself to have more control')
         logger.exception('error parsing worksheet using pandas.ExcelFile.parse(sheet_name). '
                          'Consider using the pandas_excel fmt in get_file and parsing the file '
                          'yourself to have more control')
@@ -113,13 +120,13 @@ def get_file(title=None, fmt='dict', **kwargs):
     else:
         raise ValueError('unkown format: %s' % fmt)
     if len(fmt_wb) == 1:
-        return fmt_wb.values()[0]
+        return list(fmt_wb.values())[0]
     if 'sheet' in opts:
         try:
             return fmt_wb[opts['sheet']]
         except:
-            print 'sheet name: `%s` not found in workbook.  sheet_names: %s' % (opts['sheet'], fmt_wb.keys())
-            logger.exception('sheet name: %s not found in workbook.  sheet_names: %s', opts['sheet'], fmt_wb.keys())
+            print('sheet name: `%s` not found in workbook.  sheet_names: %s' % (opts['sheet'], list(fmt_wb.keys())))
+            logger.exception('sheet name: %s not found in workbook.  sheet_names: %s', opts['sheet'], list(fmt_wb.keys()))
             raise
     else:
         return fmt_wb
@@ -223,16 +230,16 @@ def put_file(title=None, data=None, sheet_names=None, fname=None, update=False, 
                 body=body,
                 media_body=media_body,
                 newRevision=True,
-                convert=True).execute() 
+                convert=True).execute()
         else:
             if not opts['update']:
-                logger.warning('creating file with duplicate name: %s', opts['title']) 
+                logger.warning('creating file with duplicate name: %s', opts['title'])
             file = service.files().insert(
                 body=body,
                 media_body=media_body,
                 convert=True).execute()
- 
-    except errors.HttpError, error:
+
+    except errors.HttpError as error:
         logger.exception('An error occured while attempting to insert file: %s', title)
 
 
@@ -240,7 +247,7 @@ def find_file(service, opts):
     files = service.files()
     try:
         res = files.list().execute()
-    except errors.HttpError, error:
+    except errors.HttpError as error:
         logger.error('An error occurred: %s', exc_info=error)
         raise error
 
@@ -252,7 +259,7 @@ def find_file(service, opts):
         return None
     if len(fs) > 1:
         dups = '\n'.join([f['alternateLink'] for f in fs])
-        logger.warning('title `%s` matches several files in Google Drive.  Using first item in the following link:\n%s', opts['title'], dups)  
+        logger.warning('title `%s` matches several files in Google Drive.  Using first item in the following link:\n%s', opts['title'], dups)
     file = fs[0]
     return file
 
@@ -295,7 +302,7 @@ def get_credentials(flow, opts):
         # get the credentials the hard way
         auth_url = flow.step1_get_authorize_url()
         webbrowser.open(auth_url)
-        code = raw_input('go to:\n\n\t%s\n\nand enter in the code displayed:' % auth_url)
+        code = input('go to:\n\n\t%s\n\nand enter in the code displayed:' % auth_url)
         credentials = flow.step2_exchange(code)
         storage.put(credentials)
 
@@ -303,12 +310,12 @@ def get_credentials(flow, opts):
     if credentials.access_token_expired:
         logger.info('refreshing token')
         refresh_http = httplib2.Http()
-        credentials.refresh(refresh_http) 
+        credentials.refresh(refresh_http)
     return credentials
 
 
 def download(service, file):
-    logger.debug('file.viewkeys(): %s', pprint.pformat(file.viewkeys()))
+    logger.debug('file.viewkeys(): %s', pprint.pformat(file.keys()))
     #download_url = file.get('downloadUrl') # not present for some reason
     #download_url_pdf = file.get('exportLinks')['application/pdf']
     download_url = file.get('exportLinks')['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
@@ -326,7 +333,7 @@ def download(service, file):
     else:
         # The file doesn't have any content stored on Drive.
         logger.error('file does not have any content stored on Drive')
-        return None    
+        return None
 
 
 def merge_config(opts, yaml_name):
@@ -387,7 +394,7 @@ def parse_args(**kwopts):
     parser.add_argument('--usecache',
                         action='store_true',
                         help='instructs gcat to use the cache located in a file specified by the --cache option')
-    parser.add_argument('--header', 
+    parser.add_argument('--header',
                         type=int,
                         default=0,
                         help='row to use as header')
@@ -403,7 +410,7 @@ def parse_args(**kwopts):
 
 def write_to_stdout(content):
     for line in content:
-        print '\t'.join(map(str, line))
+        print('\t'.join(map(str, line)))
 
 
 def main():
@@ -419,7 +426,7 @@ def main():
 
     content = get_file(fmt='list', **parse_args())
     if isinstance(content, dict):
-        content = content.values()[0]
+        content = list(content.values())[0]
     write_to_stdout(content)
 
 
