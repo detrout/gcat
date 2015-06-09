@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from oauth2client.client import  OAuth2WebServerFlow, OAuth2Credentials
+from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 from apiclient.discovery import build
 from apiclient.http import MediaFileUpload
@@ -9,20 +9,16 @@ import httplib2
 
 import argparse
 import sys, os.path
-import re
 import time
 import logging
 
-
-from operator import itemgetter
 import collections
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict
 import webbrowser
-import yaml, csv, json, pprint
+import yaml, pprint
 import StringIO
 import shelve
 import pandas as pd
-import datetime
 
 LOGLEVELS = {'DEBUG': logging.DEBUG,
              'INFO': logging.INFO,
