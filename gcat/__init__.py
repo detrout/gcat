@@ -28,7 +28,7 @@ LOGLEVELS = {'DEBUG': logging.DEBUG,
              'INFO': logging.INFO,
              'WARNING': logging.WARNING,
              'ERROR': logging.ERROR,
-             'CRITICAL': logging.CRITICAL}  
+             'CRITICAL': logging.CRITICAL}
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def default_options():
     defaults['redirect_uri'] = 'urn:ietf:wg:oauth:2.0:oob'
     defaults['header'] = 0
     return defaults
-     
+
 def load_config(opts):
     if 'config' in opts:
         try:
@@ -79,7 +79,7 @@ def get_file(title=None, fmt='dict', **kwargs):
         store     (str)   : location in which to store file-specific credentials
         header    (int)   : which row to use as the header. use None for no header in which case
                             column names will be X1, X2, ...
-        
+
 
     """
     opts = default_options()
@@ -96,7 +96,7 @@ def get_file(title=None, fmt='dict', **kwargs):
 
     if fmt == 'pandas_excel':
         return wb
-   
+
     try:
         parsed_wb = OrderedDict([(sheet_name, wb.parse(sheet_name, header=opts['header'])) for sheet_name in wb.sheet_names])
     except:
@@ -403,7 +403,7 @@ def parse_args(**kwopts):
     if args.no_header:
         setattr(args,'header', None)
     return vars(args)
-    
+
 
 def write_to_stdout(content):
     for line in content:
