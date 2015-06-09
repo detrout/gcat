@@ -39,7 +39,10 @@ def default_options():
     defaults = {}
     defaults['store'] = os.path.expanduser('~/.gcat/store')
     defaults['config'] = os.path.expanduser('~/.gcat/config')
-    defaults['cache'] = os.path.expanduser('~/.gcat/cache')
+    cache_suffix = ''
+    if sys.version_info[0] >= 3:
+        cache_suffix = '3'
+    defaults['cache'] = os.path.expanduser('~/.gcat/cache' + cache_suffix)
     defaults['usecache'] = False
     defaults['redirect_uri'] = 'urn:ietf:wg:oauth:2.0:oob'
     defaults['header'] = 0
