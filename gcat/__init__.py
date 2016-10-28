@@ -272,7 +272,9 @@ def find_file(service, opts):
         return None
     if len(fs) > 1:
         dups = '\n'.join([f['alternateLink'] for f in fs])
-        logger.warning('title `%s` matches several files in Google Drive.  Using first item in the following link:\n%s', opts['title'], dups)
+        logger.warning('title `%s` matches several files in Google Drive.  Using first item in the following link:\n%s',
+                       opts['title'], dups)
+
     file = fs[0]
     return file
 
