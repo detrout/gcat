@@ -249,13 +249,23 @@ def put_file(title=None, data=None, sheet_names=None, fname=None, update=False, 
 def find_file(service, opts):
     files = service.files()
     try:
-        res = files.list().execute()
+        files_list_request = files.list()
+        files_list_start = files_list_request
+
+        while files_list_request is not None:
+            res = files_list_request.execute()
+            files_page = res['items']
+            fs = [f for f in files_page if f['title'] == opts['title'] ]
+
+            if len(fs) > 0:
+                break
+
+            # pagination
+            files_list_request = files.list_next(files_list_start, res)
     except errors.HttpError as error:
         logger.error('An error occurred: %s', exc_info=error)
         raise error
 
-    files = res['items']
-    fs = [f for f in files if f['title'] == opts['title'] ]
     if not fs:
         title_list = sorted([f['title'] for f in files])
         logger.error('file title: %s not in list:\n%s', opts['title'], pprint.pformat(title_list))
