@@ -24,9 +24,9 @@ setup(
             ]
         },
     install_requires=[
-       "oauth2client >= 1.0",
-       "google-api-python-client >= 1.0",
-       "httplib2 >= 0.7.6",
+       "oauth2client >= 3.0",
+       "google-api-python-client >= 1.5",
+       "httplib2 >= 0.9.0",
        "pandas >= 0.9.0",
        "PyYAML >= 3.10",
        "openpyxl >=1.5.8"
